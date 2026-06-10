@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Saint Gobain</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f5f6fa;
+        }
+
+        img {
+            height: 60px;
+            width: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Mobile table scroll fix */
+        .table-responsive {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container mt-4">
+
+    <h2 class="text-center mb-4">Saint Gobain (Gyproc) Database Management System</h2>
+
+    <!-- Buttons -->
+    <div class="d-flex flex-column flex-md-row justify-content-center gap-2 mb-4">
+        <button class="btn btn-warning w-100 w-md-auto" onclick="exportExcel()">
+            Export Excel
+        </button>
+
+        <button class="btn btn-success w-100 w-md-auto"
+                data-bs-toggle="modal"
+                data-bs-target="#createModal">
+            Create Record
+        </button>
+    </div>
+
+    <!-- Table -->
+    <div class="card p-2">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th>S.No.</th>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Contractor</th>
+                    <th>Phone Number</th>
+                    <th>Site Type</th>
+                    <th>Location</th>
+                    <th>Company</th>
+                    <th>Reason of using</th>
+                    <th>Stage</th>
+                    <th>Additional Description</th>
+                    <th>Image</th>
+                </tr>
+                </thead>
+                <tbody id="tableData"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Create Record</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="createForm">
+
+                    <input type="date" class="form-control mb-2" name="date" placeholder="Date" required>
+
+                    <input class="form-control mb-2" name="contractorName" placeholder="Contractor Name">
+
+                    <input class="form-control mb-2" name="phoneNumber" type="number" placeholder="Phone Number">
+
+                    <input class="form-control mb-2" name="siteType" placeholder="Site Type">
+
+                    <input class="form-control mb-2" name="location" placeholder="Location">
+
+                    <input class="form-control mb-2" name="company" placeholder="Company">
+
+                    <input class="form-control mb-2" name="reasonOfUsing" placeholder="Reason of Using">
+
+                    <select class="form-control mb-2" name="projectStage">
+                        <option value="">Select Project Stage</option>
+                        <option>Ongoing</option>
+                        <option>Finishing</option>
+                        <option>Completed</option>
+                    </select>
+
+                    <textarea class="form-control mb-2"
+                              name="additionalDescription"
+                              placeholder="Additional Description"
+                              rows="3"></textarea>
+
+                    <input type="file" class="form-control mb-2" name="image" accept="image/*">
+
+                    <button type="submit" class="btn btn-success w-100">
+                        Submit
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Image Preview</h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center">
+
+                <img id="previewImage"
+                     src=""
+                     class="img-fluid rounded"
+                     alt="Preview">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+    const BASE_URL = window.location.origin;
+
+    // ✅ LOAD ON PAGE LOAD
+    window.onload = function () {
+        loadAllRecords();
+    };
+
+    function showImage(id) {
+
+    const imageElement = document.getElementById("previewImage");
+
+    imageElement.src = `${BASE_URL}/${id}/image`;
+
+    const modal = new bootstrap.Modal(
+        document.getElementById("imageModal")
+    );
+
+    modal.show();
+}
+
+    function exportExcel() {
+
+    fetch(`${BASE_URL}/export/excel`)
+        .then(response => response.blob())
+        .then(blob => {
+
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "row-entry.xlsx";
+
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            window.URL.revokeObjectURL(url);
+        });
+}
+
+    // GET ALL RECORDS
+    function loadAllRecords() {
+        fetch(`${BASE_URL}/`)
+            .then(res => res.json())
+            .then(data => {
+
+                let table = "";
+
+                data.forEach(item => {
+                    table += `
+                        <tr>
+                            <td>${item.sNo}</td>
+                            <td>${item.date}</td>
+                            <td>${item.day}</td>
+                            <td>${item.contractorName}</td>
+                            <td>${item.phoneNumber}</td>
+                            <td>${item.siteType}</td>
+                            <td>${item.location}</td>
+                            <td>${item.company}</td>
+                            <td>${item.reasonOfUsing}</td>
+                            <td>${item.projectStage}</td>
+                            <td>${item.additionalDescription}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="showImage(${item.sNo})">
+                                    View Image
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById("tableData").innerHTML = table;
+            })
+            .catch(err => console.log(err));
+    }
+
+    // CREATE RECORD
+    document.getElementById("createForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+
+        fetch(`${BASE_URL}`, {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.text())
+        .then(msg => {
+            alert(msg);
+
+            // close modal
+            document.querySelector(".btn-close").click();
+
+            // refresh table
+            loadAllRecords();
+        });
+    });
+
+</script>
+
+</body>
+</html>

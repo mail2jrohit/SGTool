@@ -1,0 +1,18 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: saintgobaintool
+  datasource:
+    url: jdbc:postgresql://ep-lingering-rice-apkms4gi-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channelBinding=require
+    username: neondb_owner
+    password: npg_i5bo4unGshgP
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
